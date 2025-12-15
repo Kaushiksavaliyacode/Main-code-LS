@@ -9,9 +9,9 @@ export const DEFAULT_CURRENT: MaterialParams = {
 };
 
 export const ROW_CONFIGS: RowConfig[] = [
-  { id: 'sizer', label: 'Sizer', unit: 'mm', type: RowType.INPUT, step: 0.1 },
-  { id: 'micron', label: 'Micron', unit: 'µm', type: RowType.INPUT, step: 0.1 },
-  { id: 'rpm', label: 'RPM', unit: 'rpm', type: RowType.INPUT, step: 1, isInteger: true },
+  { id: 'sizer', label: 'Sizer', unit: '', type: RowType.INPUT, step: 0.1 },
+  { id: 'micron', label: 'Micron', unit: '', type: RowType.INPUT, step: 0.1 },
+  { id: 'rpm', label: 'RPM', unit: '', type: RowType.INPUT, step: 1, isInteger: true },
   { id: 'ls3', label: 'LS 3', unit: '', type: RowType.CALCULATED_INPUT },
   { id: 'weight', label: '1 MTR Weight', unit: 'kg', type: RowType.CALCULATED_INPUT },
 ];

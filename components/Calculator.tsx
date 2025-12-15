@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, MaterialParams, RowConfig, RowType } from '../types';
 import { DEFAULT_CURRENT, ROW_CONFIGS } from '../constants';
 import { LongPressCell } from './LongPressCell';
-import { Visualization } from './Visualization';
 import { ArrowRight, RefreshCw, Ruler, Activity, Gauge, Zap, Scale, Info, Cloud, CloudOff } from 'lucide-react';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -286,15 +285,7 @@ export const Calculator: React.FC = () => {
         </div>
         
         {/* Footer info */}
-        <div className="bg-slate-50 px-6 py-5 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex flex-col gap-1 text-center sm:text-left">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Instructions
-                </span>
-                <span className="text-sm text-slate-600 font-bold">
-                    Long press "Machine Preset" values to edit defaults.
-                </span>
-            </div>
+        <div className="bg-slate-50 px-6 py-5 border-t border-slate-200 flex flex-col sm:flex-row justify-end items-center gap-4">
             <button 
                 onClick={resetAll}
                 className="group flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-[#2563EB] hover:border-[#2563EB]/40 hover:shadow-lg hover:shadow-blue-500/10 transition-all active:scale-95"
@@ -304,14 +295,6 @@ export const Calculator: React.FC = () => {
             </button>
         </div>
       </div>
-
-      <Visualization 
-        current={state.current} 
-        set={state.set} 
-        computedLS3={results.ls3} 
-        computedWeight={results.weight}
-      />
-
     </main>
   );
 };
