@@ -1,9 +1,9 @@
 import { MaterialParams, RowConfig, RowType } from './types';
 
 export const DEFAULT_CURRENT: MaterialParams = {
-  sizer: 710,
-  micron: 35,
-  rpm: 800,
+  sizer: 750,
+  micron: 51,
+  rpm: 900,
   ls3: 1080,
   weight: 0,
 };

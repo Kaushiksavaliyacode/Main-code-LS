@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, MaterialParams, RowConfig, RowType } from '../types';
 import { DEFAULT_CURRENT, ROW_CONFIGS } from '../constants';
 import { LongPressCell } from './LongPressCell';
 import { Visualization } from './Visualization';
-import { ArrowRight, RefreshCw, Ruler, Activity, Gauge, Zap, Scale, Info } from 'lucide-react';
+import { ArrowRight, RefreshCw, Ruler, Activity, Gauge, Zap, Scale, Info, Cloud, CloudOff } from 'lucide-react';
+import { db } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // Helper to map icons to row IDs
 const getIconForRow = (id: string) => {
@@ -28,6 +30,60 @@ export const Calculator: React.FC = () => {
     ls3: '',
     weight: '',
   });
+
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error' | 'offline'>('idle');
+  const isFirstLoad = useRef(true);
+
+  // Load data from Firebase on mount
+  useEffect(() => {
+    const loadData = async () => {
+      if (!db) {
+        setSyncStatus('offline');
+        return;
+      }
+      try {
+        const docRef = doc(db, "settings", "presets");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data() as MaterialParams;
+          setState(prev => ({ 
+            ...prev, 
+            current: { ...DEFAULT_CURRENT, ...data } 
+          }));
+          console.log("Data loaded from Firebase");
+        }
+      } catch (error) {
+        console.error("Error loading from Firebase:", error);
+        setSyncStatus('error');
+      } finally {
+        isFirstLoad.current = false;
+      }
+    };
+    loadData();
+  }, []);
+
+  // Save data to Firebase when 'current' changes
+  useEffect(() => {
+    // Skip saving on the very first render/load to avoid overwriting cloud data with defaults immediately
+    if (isFirstLoad.current) return;
+    if (!db) return;
+
+    const saveData = async () => {
+      setSyncStatus('saving');
+      try {
+        await setDoc(doc(db, "settings", "presets"), state.current);
+        setSyncStatus('saved');
+        // Reset status after a moment
+        setTimeout(() => setSyncStatus('idle'), 2000);
+      } catch (error) {
+        console.error("Error saving to Firebase:", error);
+        setSyncStatus('error');
+      }
+    };
+
+    const timer = setTimeout(saveData, 1000); // Debounce saves
+    return () => clearTimeout(timer);
+  }, [state.current]);
 
   const handleCurrentUpdate = (key: keyof MaterialParams, value: number) => {
     setState((prev) => {
@@ -68,7 +124,8 @@ export const Calculator: React.FC = () => {
     if (isCustomLS3 && current.ls3 > 0) {
       finalLS3 = (current.ls3 / current.rpm) * setRPM;
     } else {
-      const baseLS = 21470400000 / setSizer / setMicron / current.rpm;
+      // Updated constant value as requested previously
+      const baseLS = 21687750000 / setSizer / setMicron / current.rpm;
       finalLS3 = baseLS * (setRPM / current.rpm);
     }
 
@@ -88,6 +145,8 @@ export const Calculator: React.FC = () => {
         set: {},
         isCustomLS3: false
     });
+    // Trigger a save of the reset values (manually handled by the effect, 
+    // but ensures we reset to defaults in cloud too)
   };
 
   // Group rows for UI
@@ -185,12 +244,26 @@ export const Calculator: React.FC = () => {
   return (
     <main className="max-w-4xl mx-auto p-4 sm:p-6 pb-24 mt-6">
       
-      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden relative">
         
         {/* Table Header */}
-        <div className="grid grid-cols-12 px-6 py-5 bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-widest font-extrabold text-slate-500">
+        <div className="grid grid-cols-12 px-6 py-5 bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-widest font-extrabold text-slate-500 relative">
             <div className="col-span-4 sm:col-span-3 pl-2">Parameter</div>
-            <div className="col-span-4 sm:col-span-4 text-right pr-4">Machine Preset</div>
+            <div className="col-span-4 sm:col-span-4 text-right pr-4 flex items-center justify-end gap-2">
+              Machine Preset
+              {/* Cloud Status Indicator */}
+              {syncStatus !== 'offline' && (
+                <div title={syncStatus === 'saving' ? "Saving..." : syncStatus === 'saved' ? "Saved" : "Cloud Sync"}>
+                   {syncStatus === 'saving' ? (
+                     <RefreshCw size={12} className="animate-spin text-[#2563EB]" />
+                   ) : syncStatus === 'error' ? (
+                     <CloudOff size={12} className="text-red-500" />
+                   ) : (
+                     <Cloud size={12} className={syncStatus === 'saved' ? "text-[#2563EB]" : "text-slate-300"} />
+                   )}
+                </div>
+              )}
+            </div>
             <div className="hidden sm:block sm:col-span-1"></div>
             <div className="col-span-4 sm:col-span-4 text-center">Target Value</div>
         </div>
