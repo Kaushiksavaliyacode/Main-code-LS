@@ -118,7 +118,7 @@ export const Calculator: React.FC = () => {
       return;
     }
 
-    const weight = setSizer * 0.00280 * 1 * setMicron;
+    const weight = setSizer * 0.00276 * 1 * setMicron;
     let finalLS3 = 0;
     
     if (isCustomLS3 && current.ls3 > 0) {
