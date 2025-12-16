@@ -1,15 +1,22 @@
 export interface MaterialParams {
-  sizer: number;
+  size: number;
   micron: number;
+  tu1: number;
+  tu2: number;
+  tu3: number;
   rpm: number;
-  ls3: number;
-  weight: number;
+}
+
+export interface FormulaConfig {
+  tu2Offset: number;
+  tu1Offset: number;
 }
 
 export interface AppState {
   current: MaterialParams;
   set: Partial<MaterialParams>;
-  isCustomLS3: boolean;
+  formulaConfig: FormulaConfig;
+  isCustomCalc: boolean;
 }
 
 export enum RowType {

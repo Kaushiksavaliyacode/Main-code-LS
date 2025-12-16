@@ -1,7 +1,11 @@
 import React from 'react';
 import { Settings2, Calculator } from 'lucide-react';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenSettings: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 transition-all duration-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between py-3">
@@ -18,7 +22,10 @@ export const Header: React.FC = () => {
           </div>
         </div>
         
-        <button className="p-2.5 text-slate-500 hover:text-[#2563EB] hover:bg-blue-50 rounded-xl transition-colors">
+        <button 
+          onClick={onOpenSettings}
+          className="p-2.5 text-slate-500 hover:text-[#2563EB] hover:bg-blue-50 rounded-xl transition-colors cursor-pointer"
+        >
           <Settings2 size={22} strokeWidth={2} />
         </button>
       </div>
